@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NoteText XP</title>
+    <style>
+        body {
+            background-color: black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'MS Sans Serif', 'Arial', sans-serif; /* Classic Windows XP font */
+            overflow: hidden; /* Prevent scrollbars */
+        }
+
+        .window-frame {
+            background-color: #ECE9D8; /* XP window background color */
+            border: 2px solid #0A246A; /* Dark blue border */
+            box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5); /* Simple shadow */
+            display: flex;
+            flex-direction: column;
+            width: 90%; /* Adjust as needed */
+            height: 90vh; /* Adjust as needed */
+            max-width: 1200px;
+            max-height: 800px;
+            resize: both; /* Allow resizing */
+            overflow: hidden;
+        }
+
+        .title-bar {
+            background: linear-gradient(to right, #0A246A, #A6CAF0); /* XP title bar gradient */
+            color: white;
+            padding: 5px 10px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: default;
+            user-select: none;
+            border-bottom: 1px solid #0A246A;
+        }
+
+        .title-bar-buttons button {
+            background-color: #C0C0C0;
+            border: 1px solid #808080;
+            color: black;
+            width: 20px;
+            height: 20px;
+            font-size: 14px;
+            line-height: 1;
+            cursor: pointer;
+            margin-left: 2px;
+        }
+
+        .title-bar-buttons button:hover {
+            background-color: #E0E0E0;
+        }
+
+        .menu-bar {
+            background-color: #ECE9D8;
+            border-bottom: 1px solid #C0C0C0;
+            display: flex;
+            padding: 2px 0;
+        }
+
+        .menu-bar ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+
+        .menu-bar li {
+            position: relative;
+        }
+
+        .menu-bar a {
+            display: block;
+            padding: 3px 10px;
+            text-decoration: none;
+            color: black;
+            font-size: 14px;
+        }
+
+        .menu-bar a:hover {
+            background-color: #0A246A;
+            color: white;
+        }
+
+        .menu-bar ul ul {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: #ECE9D8;
+            border: 1px solid #808080;
+            z-index: 10;
+            min-width: 120px;
+        }
+
+        .menu-bar ul li:hover > ul {
+            display: block;
+        }
+
+        .menu-bar ul ul li {
+            width: 100%;
+        }
+
+        .menu-bar ul ul a {
+            padding: 5px 10px;
+        }
+
+        textarea {
+            flex-grow: 1;
+            width: 100%;
+            height: calc(100% - 40px - 28px); /* Adjust height considering title bar and menu bar */
+            border: 1px solid #7F9DB9; /* XP input border color */
+            padding: 10px;
+            font-size: 16px;
+            background-color: white;
+            box-sizing: border-box; /* Include padding in element's total width and height */
+            resize: none; /* Disable default textarea resizing */
+            font-family: 'MS Sans Serif', 'Arial', sans-serif;
+            color: black;
+        }
+
+        /* Placeholder style */
+        textarea::placeholder {
+            color: #808080;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="window-frame">
+        <div class="title-bar">
+            <span>Notatnik</span>
+            <div class="title-bar-buttons">
+                <button>_</button>
+                <button>&#9723;</button>
+                <button>X</button>
+            </div>
+        </div>
+
+        <div class="menu-bar">
+            <ul>
+                <li>
+                    <a href="#">File</a>
+                    <ul>
+                        <li><a href="#" onclick="newText()">New</a></li>
+                        <li><a href="#" onclick="openFile()">Open...</a></li>
+                        <li><a href="#" onclick="downloadText()">Save</a></li>
+                        <li><a href="#" onclick="saveAsText()">Save As...</a></li>
+                        <li><a href="#" onclick="window.close()">Exit</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#">Edit</a>
+                    <ul>
+                        <li><a href="#" onclick="cutText()">Cut</a></li>
+                        <li><a href="#" onclick="copyText()">Copy</a></li>
+                        <li><a href="#" onclick="pasteText()">Paste</a></li>
+                        <li><a href="#" onclick="deleteText()">Delete</a></li>
+                        <li><a href="#" onclick="selectAllText()">Select All</a></li>
+                        <li><a href="#" onclick="wordCount()">Word Count</a></li>
+                        <li><a href="#" onclick="characterCount()">Character Count</a></li> </ul>
+                </li>
+                <li>
+                    <a href="#">Help</a>
+                    <ul>
+                        <li><a href="#" onclick="showAbout()">About NoteText XP</a></li>
+                        <li><a href="https://whatsapp.com/channel/0029VbAzVx2IyPtQh1PMxf0Z" target="_blank">WhatsApp Channel</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <textarea id="noteText" placeholder="Welcome to NoteText XP!
+Type a text, and save!
+Enjoy!"></textarea>
+
+    </div>
+
+    <input type="file" id="fileInput" accept=".txt" style="display: none;">
+
+    <script>
+        const noteTextarea = document.getElementById('noteText');
+        const fileInput = document.getElementById('fileInput');
+
+        function downloadText() {
+            const fileName = prompt('File name?', 'notetextXP.txt');
+            if (fileName === null) return; // User cancelled
+
+            const text = noteTextarea.value;
+            const blob = new Blob([text], { type: 'text/plain' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(a.href);
+        }
+
+        function saveAsText() {
+            downloadText(); // Reusing downloadText for Save As functionality
+        }
+
+        function openFile() {
+            fileInput.click();
+        }
+
+        fileInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    noteTextarea.value = e.target.result;
+                };
+                reader.readAsText(file);
+            }
+        });
+
+        function newText() {
+            if (confirm('Are you sure you want to start a new note? Any unsaved changes will be lost.')) {
+                noteTextarea.value = '';
+            }
+        }
+
+        function copyText() {
+            noteTextarea.select();
+            document.execCommand('copy');
+        }
+
+        function cutText() {
+            // Get the selected text or the text from the current cursor position to the end
+            const selectionStart = noteTextarea.selectionStart;
+            const selectionEnd = noteTextarea.selectionEnd;
+
+            if (selectionStart !== selectionEnd) {
+                // If text is selected, cut the selection
+                document.execCommand('cut');
+            } else {
+                // If no text is selected, cut from the cursor to the end of the line or entire content
+                const currentText = noteTextarea.value;
+                const textAfterCursor = currentText.substring(selectionStart);
+
+                if (textAfterCursor) {
+                    // Copy text after cursor to clipboard
+                    const tempInput = document.createElement('textarea');
+                    tempInput.value = textAfterCursor;
+                    document.body.appendChild(tempInput);
+                    tempInput.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(tempInput);
+
+                    // Remove text after cursor
+                    noteTextarea.value = currentText.substring(0, selectionStart);
+                }
+            }
+        }
+
+        function pasteText() {
+            navigator.clipboard.readText().then(clipText => {
+                const start = noteTextarea.selectionStart;
+                const end = noteTextarea.selectionEnd;
+                const currentText = noteTextarea.value;
+                noteTextarea.value = currentText.substring(0, start) + clipText + currentText.substring(end);
+                noteTextarea.selectionStart = noteTextarea.selectionEnd = start + clipText.length;
+            }).catch(err => {
+                // Fallback for browsers not supporting Clipboard API
+                alert('Press Ctrl+V (or Cmd+V) to paste.');
+            });
+        }
+
+        function deleteText() {
+            const selectionStart = noteTextarea.selectionStart;
+            const selectionEnd = noteTextarea.selectionEnd;
+
+            if (selectionStart !== selectionEnd) {
+                // If text is selected, delete the selection
+                const currentText = noteTextarea.value;
+                noteTextarea.value = currentText.substring(0, selectionStart) + currentText.substring(selectionEnd);
+                noteTextarea.selectionStart = noteTextarea.selectionEnd = selectionStart;
+            } else {
+                // If no text is selected, delete character after cursor
+                const currentText = noteTextarea.value;
+                noteTextarea.value = currentText.substring(0, selectionStart) + currentText.substring(selectionStart + 1);
+                noteTextarea.selectionStart = noteTextarea.selectionEnd = selectionStart;
+            }
+        }
+
+        function selectAllText() {
+            noteTextarea.select();
+        }
+
+        function wordCount() {
+            const text = noteTextarea.value;
+            const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+            alert('Word Count: ' + words.length);
+        }
+
+        function characterCount() {
+            const text = noteTextarea.value;
+            alert('Character Count (including spaces): ' + text.length);
+        }
+
+        function showAbout() {
+            alert('NoteText XP\nVersion 1.2\nBananek355');
+        }
+    </script>
+</body>
+</html>
